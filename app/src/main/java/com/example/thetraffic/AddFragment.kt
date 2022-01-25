@@ -56,6 +56,7 @@ class AddFragment : Fragment() {
     val category = arrayOf("Qaysi turga kirishi","Ogohlantiruvchi","Imtiyozli","Ta'qiqlovchi","Buyuruvchi")
     lateinit var currentImagePath: String
     lateinit var binding: FragmentAddBinding
+    private var fileAbsolutePath: String? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -64,28 +65,75 @@ class AddFragment : Fragment() {
         binding = FragmentAddBinding.inflate(layoutInflater)
         myDbHelper = MyDbHelper(binding.root.context)
 
+        val edit = arguments?.getString("edit")
+        val add = arguments?.getString("add")
         val arrayAdapter = ArrayAdapter(binding.root.context,android.R.layout.simple_spinner_dropdown_item,category)
         binding.spinner.adapter = arrayAdapter
 
 
-
-        binding.imagee.setOnClickListener {
-            val picturesDialog = AlertDialog.Builder(binding.root.context)
-            val dialog = picturesDialog.create()
-            picturesDialog.setNegativeButton("Bekor qilish",{ dialogInterFace: DialogInterface, i: Int ->
-                dialog.dismiss()
-            })
-            picturesDialog.setTitle("Kamera yoki Gallerreyani tanlang")
-            val DialogItems = arrayOf("Galereyadan rasm tanlash", "Kamera orqali rasmga olish")
-            picturesDialog.setItems(DialogItems){
-                dialog, which ->
-                when(which){
-                    0 -> permission_gallery()
-                    1 -> permission_camera()
-                }
+        if (edit!=null){
+            setvalue()
+            binding.imagee.setOnClickListener {
+                dialog()
             }
-            picturesDialog.show()
+            binding.save.setOnClickListener {
+                val tahrir = arguments?.getSerializable("tahrir") as CameraModel
+                val heading = binding.name.text.toString().trim()
+                val descriptionim = binding.description.text.toString().trim()
+                val kategoriya = binding.spinner.selectedItem.toString()
+
+
+                if (fileAbsolutePath.isNullOrEmpty()){
+                    fileAbsolutePath = tahrir.rasm
+                    tahrir.nomi = heading
+                    tahrir.malumot = descriptionim
+                    tahrir.kategoriya = kategoriya
+                    myDbHelper.updateCamera(tahrir)
+                }else{
+                    tahrir.nomi = heading
+                    tahrir.rasm = fileAbsolutePath
+                    tahrir.malumot = descriptionim
+                    tahrir.kategoriya = kategoriya
+                    myDbHelper.updateCamera(tahrir)
+                }
+
+
+
+
+
+                    findNavController().popBackStack()
+                    Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_SHORT).show()
+                }
+
+
+
+
+            }
+
+        if (add!=null){
+
+
+
+            binding.imagee.setOnClickListener {
+                val picturesDialog = AlertDialog.Builder(binding.root.context)
+                val dialog = picturesDialog.create()
+                picturesDialog.setNegativeButton("Bekor qilish",{ dialogInterFace: DialogInterface, i: Int ->
+                    dialog.dismiss()
+                })
+                picturesDialog.setTitle("Kamera yoki Gallerreyani tanlang")
+                val DialogItems = arrayOf("Galereyadan rasm tanlash", "Kamera orqali rasmga olish")
+                picturesDialog.setItems(DialogItems){
+                        dialog, which ->
+                    when(which){
+                        0 -> permission_gallery()
+                        1 -> permission_camera()
+                    }
+                }
+                picturesDialog.show()
+            }
         }
+
+
 
         binding.tooolbaradd.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -95,6 +143,203 @@ class AddFragment : Fragment() {
 
         return binding.root
     }
+
+
+
+
+    private fun setvalue() {
+        val tahrir = arguments?.getSerializable("tahrir") as CameraModel
+        binding.imagee.setImageURI(Uri.parse(tahrir.rasm))
+        binding.name.setText(tahrir.nomi)
+        binding.description.setText(tahrir.malumot)
+
+
+        var indexCategory = -1
+        for (i in 0 until category.size){
+            if (category[i] == tahrir.kategoriya) {
+                indexCategory = i
+                break
+            }
+        }
+        binding.spinner.setSelection(indexCategory)
+    }
+
+    private fun dialog() {
+        val picturesDialog = AlertDialog.Builder(binding.root.context)
+        val dialog = picturesDialog.create()
+        picturesDialog.setNegativeButton("Bekor qilish",{ dialogInterFace: DialogInterface, i: Int ->
+            dialog.dismiss()
+        })
+        picturesDialog.setTitle("Kamera yoki Gallerreyani tanlang")
+        val DialogItems = arrayOf("Galereyadan rasm tanlash", "Kamera orqali rasmga olish")
+        picturesDialog.setItems(DialogItems){
+                dialog, which ->
+            when(which){
+                0 -> edit_pick_gallery()
+                1 -> edit_permission_camera()
+            }
+        }
+        picturesDialog.show()
+    }
+
+    private fun edit_permission_camera() {
+        askPermission(Manifest.permission.CAMERA) {
+            //all permissions already granted or just granted
+            //your action
+            Toast.makeText(binding.root.context, "Granted", Toast.LENGTH_SHORT).show()
+            val imageFile = createImageFile()
+            photoURI = FileProvider.getUriForFile(binding.root.context,BuildConfig.APPLICATION_ID,imageFile)
+            getTakeeditImageContent.launch(photoURI)
+
+        }
+            .onDeclined { e ->
+                if (e.hasDenied()) {
+                    android.app.AlertDialog.Builder(binding.root.context)
+                        .setMessage("Please accept our permissions")
+                        .setPositiveButton("yes") { dialog, which ->
+                            e.askAgain();
+                        } //ask again
+                        .setNegativeButton("no") { dialog, which ->
+                            Toast.makeText(binding.root.context, "Rad etildi", Toast.LENGTH_SHORT).show()
+                            dialog.dismiss();
+                        }
+                        .show();
+                }
+                if(e.hasForeverDenied()) {
+
+                    // you need to open setting manually if you really need it
+                    e.goToSettings();
+                }
+            }
+    }
+
+
+
+    private val getTakeeditImageContent =
+        registerForActivityResult(ActivityResultContracts.TakePicture()){
+
+            if (it) {
+                binding.imagee.setImageURI(photoURI)
+                val format = SimpleDateFormat("yyyyMM_HHmmss", Locale.getDefault()).format(Date())
+                val filesDir = binding.root.context.filesDir
+                val contentResolver = activity?.contentResolver
+                val openInputStream = contentResolver?.openInputStream(photoURI)
+                val file = File(filesDir,"image.jpg$format")
+                val fileOutputStream = FileOutputStream(file)
+                openInputStream?.copyTo(fileOutputStream)
+                openInputStream?.close()
+                fileOutputStream.close()
+                val fileAbsolutePath = file.absolutePath
+
+
+                binding.save.setOnClickListener {
+                    val tahrir = arguments?.getSerializable("tahrir") as CameraModel
+                    val heading = binding.name.text.toString().trim()
+                    val descriptionim = binding.description.text.toString().trim()
+                    val kategoriya = binding.spinner.selectedItem.toString()
+
+
+
+                        tahrir.nomi = heading
+                        tahrir.rasm = fileAbsolutePath
+                        tahrir.malumot = descriptionim
+                        tahrir.kategoriya = kategoriya
+                        myDbHelper.updateCamera(tahrir)
+
+
+
+
+
+
+                    findNavController().popBackStack()
+                    Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_SHORT).show()
+
+
+
+
+
+
+                }
+
+            }
+
+    }
+
+    private fun edit_pick_gallery() {
+        askPermission(Manifest.permission.READ_EXTERNAL_STORAGE) {
+            //all permissions already granted or just granted
+            //your action
+            Toast.makeText(binding.root.context, "Granted", Toast.LENGTH_SHORT).show()
+            geteditImageContent.launch("image/*")
+        }
+            .onDeclined { e ->
+                if (e.hasDenied()) {
+                    android.app.AlertDialog.Builder(binding.root.context)
+                        .setMessage("Please accept our permissions")
+                        .setPositiveButton("yes") { dialog, which ->
+                            e.askAgain();
+                        } //ask again
+                        .setNegativeButton("no") { dialog, which ->
+                            Toast.makeText(binding.root.context, "Rad etildi", Toast.LENGTH_SHORT).show()
+                            dialog.dismiss();
+                        }
+                        .show();
+                }
+                if(e.hasForeverDenied()) {
+
+                    // you need to open setting manually if you really need it
+                    e.goToSettings();
+                }
+            }
+
+    }
+    private val geteditImageContent =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri ?: return@registerForActivityResult
+            binding.imagee.setImageURI(uri)
+            val format = SimpleDateFormat("yyyyMM_HHmmss", Locale.getDefault()).format(Date())
+
+            val filesDir = binding.root.context.filesDir
+            val contentResolver = activity?.contentResolver
+            val openInputStream = contentResolver?.openInputStream(uri)
+            val file = File(filesDir, "image.jp$format")
+            val fileOutputStream = FileOutputStream(file)
+            openInputStream?.copyTo(fileOutputStream)
+            openInputStream?.close()
+            fileOutputStream.close()
+
+
+           fileAbsolutePath = file.absolutePath
+            val fileInputStream = FileInputStream(file)
+//            binding.save.setOnClickListener {
+//                val tahrir = arguments?.getSerializable("tahrir") as CameraModel
+//                val heading = binding.name.text.toString().trim()
+//                val descriptionim = binding.description.text.toString().trim()
+//                val kategoriya = binding.spinner.selectedItem.toString()
+//
+//                if (heading.isNotEmpty() && descriptionim.isNotEmpty() && kategoriya != "Qaysi turga kirishi"){
+//                    tahrir.nomi = heading
+//                    tahrir.rasm = fileAbsolutePath
+//                    tahrir.malumot = descriptionim
+//                    tahrir.kategoriya = kategoriya
+//                    myDbHelper.updateCamera(tahrir)
+//                    findNavController().popBackStack()
+//                    Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_SHORT).show()
+//                }else{
+//                    Toast.makeText(binding.root.context, "Iltimos ma'lumotlarni to'liq va aniq kiritganingizga ishonch hosil qiling", Toast.LENGTH_SHORT).show()
+//                }
+//        }
+
+        }
+
+
+
+
+
+
+
+
+    // pasda faqat add qilishga oid
 
     private fun permission_camera() {
         askPermission(Manifest.permission.CAMERA) {
@@ -157,7 +402,7 @@ class AddFragment : Fragment() {
                         myDbHelper.insertCamera(cameraModel)
                         myDbHelper.getAllCamera()
                         findNavController().popBackStack()
-                        Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_LONG).show()
                     }else{
                         Toast.makeText(binding.root.context, "Iltimos ma'lumotlarni to'liq va aniq kiritganingizga ishonch hosil qiling", Toast.LENGTH_SHORT).show()
                     }
@@ -246,7 +491,7 @@ class AddFragment : Fragment() {
                         myDbHelper.insertCamera(cameraModel)
                         myDbHelper.getAllCamera()
                         findNavController().popBackStack()
-                        Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_SHORT)
+                        Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_LONG)
                             .show()
                     } else {
                         Toast.makeText(

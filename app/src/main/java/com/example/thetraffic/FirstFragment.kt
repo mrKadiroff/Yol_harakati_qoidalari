@@ -51,7 +51,9 @@ class FirstFragment : Fragment() {
         root.tooolbar.inflateMenu(R.menu.add_menu)
         root.tooolbar.setOnMenuItemClickListener {
             if (it.itemId == R.id.add){
-                findNavController().navigate(R.id.addFragment)
+                var bundle = Bundle()
+                bundle.putString("add","add")
+                findNavController().navigate(R.id.addFragment,bundle)
             }
             true
         }

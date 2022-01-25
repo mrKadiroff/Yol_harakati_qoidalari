@@ -5,7 +5,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.example.thetraffic.FirstFragment
 import com.example.thetraffic.SecondFragment
+
 import com.example.thetraffic.tab_fragments.OgohFragment
+
 
 class TrafficMainAdapter(fragmentManager: FragmentManager) :
     FragmentStatePagerAdapter(

@@ -1,16 +1,21 @@
 package com.example.thetraffic.tab_fragments
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.thetraffic.R
 import com.example.thetraffic.adapters.Camera_adapter
 import com.example.thetraffic.databinding.FragmentOgohBinding
 import com.example.thetraffic.db.MyDbHelper
 import com.example.thetraffic.models.CameraModel
+import java.io.File
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -38,7 +43,6 @@ class OgohFragment : Fragment() {
     lateinit var myDbHelper: MyDbHelper
     lateinit var cameraList: ArrayList<CameraModel>
     lateinit var list: ArrayList<CameraModel>
-    lateinit var list2: ArrayList<CameraModel>
     lateinit var rvAdapter: Camera_adapter
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,74 +50,130 @@ class OgohFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         binding= FragmentOgohBinding.inflate(layoutInflater)
+        myDbHelper = MyDbHelper(binding.root.context)
 
 
-
-
-        if (categoryID == 1){
-            myDbHelper = MyDbHelper(binding.root.context)
-            cameraList = myDbHelper.getAllCamera()
-            list = ArrayList()
-            cameraList.forEach{
-                if (it.kategoriya == "Ogohlantiruvchi") {
-                    list.add(it)
-                }
-            }
-            list = myDbHelper.getAllCamera()
-
-            rvAdapter = Camera_adapter(list)
-            binding.cameraRv.adapter = rvAdapter
-        }
-
-        if (categoryID == 2){
-            val kateg = "Imtiyozli"
-            myDbHelper = MyDbHelper(binding.root.context)
-            cameraList = myDbHelper.getAllCamera()
-            list2 = ArrayList()
-            cameraList.forEach{
-                if (it.kategoriya == kateg) {
-                    list2.add(it)
-                }
-            }
-            list2 = myDbHelper.getAllCamera()
-
-            rvAdapter = Camera_adapter(list2)
-            binding.cameraRv.adapter = rvAdapter
-        }
-
-
-//        if (categoryID == 3){
-//            cameraList.forEach{
-//                if (it.kategoriya == "Ta'qiqlovchi") {
-//                    list.add(it)
-//                }
-//            }
-//            list = myDbHelper.getAllCamera()
-//
-//            rvAdapter = Camera_adapter(list)
-//            binding.cameraRv.adapter = rvAdapter
-//        }
-//
-//        if (categoryID == 4){
-//            cameraList.forEach{
-//                if (it.kategoriya == "Buyuruvchi") {
-//                    list.add(it)
-//                }
-//            }
-//            list = myDbHelper.getAllCamera()
-//
-//            rvAdapter = Camera_adapter(list)
-//            binding.cameraRv.adapter = rvAdapter
-//        }
-
-
-
-
-
+        setRv()
+        connectRv()
 
 
 
         return binding.root
+    }
+
+
+
+    private fun setRv() {
+        cameraList = myDbHelper.getAllCamera()
+        list = ArrayList()
+
+        if (categoryID == 1) {
+
+            cameraList.forEach {
+                if (it.kategoriya == "Ogohlantiruvchi") {
+                    list.add(it)
+                }
+            }
+
+
+
+        }
+
+        if (categoryID == 2){
+            val kateg = "Imtiyozli"
+            list = ArrayList()
+            cameraList.forEach{
+                if (it.kategoriya == kateg) {
+                    list.add(it)
+                }
+            }
+
+
+        }
+
+
+        if (categoryID == 3){
+            cameraList.forEach{
+                if (it.kategoriya == "Ta'qiqlovchi") {
+                    list.add(it)
+                }
+            }
+
+
+
+        }
+
+        if (categoryID == 4){
+            cameraList.forEach{
+                if (it.kategoriya == "Buyuruvchi") {
+                    list.add(it)
+                }
+            }
+
+
+        }
+    }
+
+    private fun connectRv() {
+        rvAdapter = Camera_adapter(list, object : Camera_adapter.OnItemClickListener{
+            override fun onItemClick(cameraModel: CameraModel) {
+                var bundle = Bundle()
+                bundle.putSerializable("data",cameraModel)
+                findNavController().navigate(R.id.resultFragment,bundle)
+            }
+
+            override fun onEditClick(cameraModel: CameraModel, position: Int) {
+                var bundle = Bundle()
+                bundle.putString("edit","edit")
+                bundle.putSerializable("tahrir",cameraModel)
+                findNavController().navigate(R.id.addFragment,bundle)
+            }
+
+            override fun onDeleteClick(cameraModel: CameraModel, position: Int) {
+                myDbHelper.deleteCamera(cameraModel)
+                list.remove(cameraModel)
+                rvAdapter.notifyItemRemoved(position)
+                rvAdapter.notifyItemRangeChanged(position, list.size)
+
+
+
+                val filesDir = binding.root.context.filesDir
+
+                if (filesDir.isDirectory){
+                    val listFiles = filesDir.listFiles()
+
+                    for (listFile in listFiles) {
+                        if (listFile.absolutePath == cameraModel.rasm){
+                            listFile.delete()
+                        }
+
+
+                    }
+                }
+
+
+            }
+
+            override fun onFavouriteClick(cameraModel: CameraModel, position: Int, checkBox: CheckBox) {
+                checkBox.setOnCheckedChangeListener { checkBox, isChecked ->
+
+                    if (isChecked) {
+                        showToast("Item added to list")
+                    } else {
+                        showToast("Item removed from wishlist")
+                    }
+                }
+            }
+
+        })
+        binding.cameraRv.adapter = rvAdapter
+        rvAdapter.notifyDataSetChanged()
+
+    }
+
+    private fun showToast(str:String) {
+        Toast.makeText(binding.root.context, str, Toast.LENGTH_SHORT).show()
+
     }
 
     companion object {
