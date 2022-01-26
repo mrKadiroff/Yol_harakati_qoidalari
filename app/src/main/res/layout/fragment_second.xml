@@ -17,4 +17,13 @@
         app:title="Yoqtirganlar"
         app:titleTextColor="@color/white"
         android:background="@color/main_color"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/favourite_rv"
+        android:layout_width="match_parent"
+        tools:listitem="@layout/camer_layout"
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+
 </LinearLayout>

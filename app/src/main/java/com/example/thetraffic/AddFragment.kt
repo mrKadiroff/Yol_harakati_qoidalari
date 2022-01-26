@@ -398,7 +398,7 @@ class AddFragment : Fragment() {
                     val kategoriya = binding.spinner.selectedItem.toString()
 
                     if (heading.isNotEmpty() && descriptionim.isNotEmpty() && kategoriya != "Qaysi turga kirishi"){
-                        val cameraModel = CameraModel(fileAbsolutePath,heading,descriptionim,kategoriya)
+                        val cameraModel = CameraModel(fileAbsolutePath,heading,descriptionim,kategoriya,"not_liked")
                         myDbHelper.insertCamera(cameraModel)
                         myDbHelper.getAllCamera()
                         findNavController().popBackStack()
@@ -487,7 +487,7 @@ class AddFragment : Fragment() {
 
                     if (heading.isNotEmpty() && descriptionim.isNotEmpty() && kategoriya != "Qaysi turga kirishi") {
                         val cameraModel =
-                            CameraModel(fileAbsolutePath, heading, descriptionim, kategoriya)
+                            CameraModel(fileAbsolutePath, heading, descriptionim, kategoriya,"not_liked")
                         myDbHelper.insertCamera(cameraModel)
                         myDbHelper.getAllCamera()
                         findNavController().popBackStack()

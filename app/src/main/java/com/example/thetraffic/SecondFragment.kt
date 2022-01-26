@@ -5,6 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
+import com.example.thetraffic.adapters.Camera_adapter
+import com.example.thetraffic.databinding.FragmentOgohBinding
+import com.example.thetraffic.databinding.FragmentSecondBinding
+import com.example.thetraffic.db.MyDbHelper
+import com.example.thetraffic.models.CameraModel
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -28,13 +34,53 @@ class SecondFragment : Fragment() {
             liked = it.getBoolean(ARG_PARAM2)
         }
     }
-
+    lateinit var binding: FragmentSecondBinding
+    lateinit var cameraList: ArrayList<CameraModel>
+    lateinit var myDbHelper: MyDbHelper
+    lateinit var rvAdapter: Camera_adapter
+    lateinit var list: ArrayList<CameraModel>
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_second, container, false)
+        binding= FragmentSecondBinding.inflate(layoutInflater)
+        myDbHelper = MyDbHelper(binding.root.context)
+
+        cameraList = myDbHelper.getAllCamera()
+        list = ArrayList()
+        for (like in cameraList){
+            if (like.like == "liked"){
+                list.add(like)
+            }
+        }
+
+        rvAdapter = Camera_adapter(list, object : Camera_adapter.OnItemClickListener{
+            override fun onItemClick(cameraModel: CameraModel) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onEditClick(cameraModel: CameraModel, position: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onDeleteClick(cameraModel: CameraModel, position: Int) {
+                TODO("Not yet implemented")
+            }
+
+//            override fun onFavouriteClick(
+//                cameraModel: CameraModel,
+//                position: Int,
+//                checkBox: CheckBox
+//            ) {
+//                TODO("Not yet implemented")
+//            }
+
+        })
+        binding.favouriteRv.adapter = rvAdapter
+        rvAdapter.notifyDataSetChanged()
+
+        return binding.root
     }
 
     companion object {

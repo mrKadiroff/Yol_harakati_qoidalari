@@ -1,22 +1,29 @@
 package com.example.thetraffic.adapters
 
-import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.ImageButton
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.CompoundButton
+import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.RecyclerView
+import com.example.thetraffic.R
 import com.example.thetraffic.databinding.CamerLayoutBinding
+import com.example.thetraffic.db.MyDbHelper
 import com.example.thetraffic.models.CameraModel
-import java.io.File
+
+lateinit var myDbHelper: MyDbHelper
 
 class Camera_adapter(var list: List<CameraModel>,var onItemClickListener: OnItemClickListener) :RecyclerView.Adapter<Camera_adapter.Vh>() {
+
 
     inner class Vh(var cameralayoutBinding: CamerLayoutBinding) : RecyclerView.ViewHolder(cameralayoutBinding.root){
 
         fun onBind(cameraModel: CameraModel) {
+            myDbHelper = MyDbHelper(cameralayoutBinding.root.context)
+
             cameralayoutBinding.rasm.setImageURI(Uri.parse(cameraModel.rasm))
             cameralayoutBinding.name.text = cameraModel.nomi
 
@@ -29,9 +36,34 @@ class Camera_adapter(var list: List<CameraModel>,var onItemClickListener: OnItem
             cameralayoutBinding.delete.setOnClickListener {
                 onItemClickListener.onDeleteClick(cameraModel, position)
             }
+
             cameralayoutBinding.favourite.setOnClickListener {
-                onItemClickListener.onFavouriteClick(cameraModel, position,cameralayoutBinding.favourite)
+                cameralayoutBinding.favourite.setImageResource(R.drawable.ic_heart_filled)
             }
+
+
+
+
+
+
+
+//            cameralayoutBinding.favourite.setOnCheckedChangeListener { checkBox, isChecked ->
+//                if (isChecked) {
+//                    cameraModel.like = "liked"
+//                    myDbHelper.updateCamera(cameraModel)
+//                    Toast.makeText(cameralayoutBinding.root.context, "Item added to list", Toast.LENGTH_SHORT).show()
+//
+//                } else {
+//                    Toast.makeText(cameralayoutBinding.root.context, "Item removed from list", Toast.LENGTH_SHORT).show()
+//                    cameraModel.like = "not_liked"
+//                    myDbHelper.updateCamera(cameraModel)
+//                }
+//            }
+
+
+
+
+
 
         }
 
@@ -51,7 +83,7 @@ class Camera_adapter(var list: List<CameraModel>,var onItemClickListener: OnItem
         fun onItemClick(cameraModel: CameraModel)
         fun onEditClick(cameraModel: CameraModel, position: Int)
         fun onDeleteClick(cameraModel: CameraModel, position: Int)
-        fun onFavouriteClick(cameraModel: CameraModel, position: Int,checkBox: CheckBox)
+//        fun onFavouriteClick(cameraModel: CameraModel, position: Int,checkBox: CheckBox)
     }
 
 }

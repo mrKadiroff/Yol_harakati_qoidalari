@@ -154,16 +154,20 @@ class OgohFragment : Fragment() {
 
             }
 
-            override fun onFavouriteClick(cameraModel: CameraModel, position: Int, checkBox: CheckBox) {
-                checkBox.setOnCheckedChangeListener { checkBox, isChecked ->
-
-                    if (isChecked) {
-                        showToast("Item added to list")
-                    } else {
-                        showToast("Item removed from wishlist")
-                    }
-                }
-            }
+//            override fun onFavouriteClick(cameraModel: CameraModel, position: Int, checkBox: CheckBox) {
+//                checkBox.setOnCheckedChangeListener { checkBox, isChecked ->
+//
+//                    if (isChecked) {
+//                        showToast("Item added to list")
+//                        cameraModel.like = "liked"
+//                        myDbHelper.updateCamera(cameraModel)
+//                    } else {
+//                        showToast("Item removed from wishlist")
+//                        cameraModel.like = "not_liked"
+//                        myDbHelper.updateCamera(cameraModel)
+//                    }
+//                }
+//            }
 
         })
         binding.cameraRv.adapter = rvAdapter

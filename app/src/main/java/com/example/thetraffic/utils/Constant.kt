@@ -11,4 +11,5 @@ object Constant {
     const val NAME = "name"
     const val DESCRIPTION = "description"
     const val CATEGORY = "category"
+    const val LIKED = "liked"
 }
