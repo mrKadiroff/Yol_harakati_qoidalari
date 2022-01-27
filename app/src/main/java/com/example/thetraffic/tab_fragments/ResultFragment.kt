@@ -1,5 +1,6 @@
 package com.example.thetraffic.tab_fragments
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import com.example.thetraffic.MainActivity
 import com.example.thetraffic.R
 import com.example.thetraffic.databinding.FragmentResultBinding
 import com.example.thetraffic.models.CameraModel
@@ -61,6 +63,16 @@ class ResultFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (activity as MainActivity).hideBottomNavigation()
+    }
+
+    override fun onDetach() {
+        (activity as MainActivity).showBottomNavigation()
+        super.onDetach()
     }
 
     companion object {

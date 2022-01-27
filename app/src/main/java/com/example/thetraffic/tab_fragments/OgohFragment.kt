@@ -1,5 +1,6 @@
 package com.example.thetraffic.tab_fragments
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.thetraffic.R
 import com.example.thetraffic.adapters.Camera_adapter
+import com.example.thetraffic.databinding.CamerLayoutBinding
 import com.example.thetraffic.databinding.FragmentOgohBinding
 import com.example.thetraffic.db.MyDbHelper
 import com.example.thetraffic.models.CameraModel
@@ -154,20 +156,35 @@ class OgohFragment : Fragment() {
 
             }
 
-//            override fun onFavouriteClick(cameraModel: CameraModel, position: Int, checkBox: CheckBox) {
-//                checkBox.setOnCheckedChangeListener { checkBox, isChecked ->
-//
-//                    if (isChecked) {
-//                        showToast("Item added to list")
-//                        cameraModel.like = "liked"
-//                        myDbHelper.updateCamera(cameraModel)
-//                    } else {
-//                        showToast("Item removed from wishlist")
-//                        cameraModel.like = "not_liked"
-//                        myDbHelper.updateCamera(cameraModel)
-//                    }
-//                }
-//            }
+            var a = 100
+            @SuppressLint("ResourceAsColor")
+            override fun onFavouriteClick(
+                cameralayoutBinding: CamerLayoutBinding,
+                cameraModel: CameraModel,
+                position: Int
+            ) {
+
+                cameralayoutBinding.bookmarkBtn.setImageResource(R.drawable.ic_heart4)
+                if (a == position) {
+                    cameralayoutBinding.bookmarkBtn.setImageResource(R.drawable.ic_heart4)
+                    cameraModel.like = R.drawable.ic_heart4
+                    val cameraModel =
+                        CameraModel(cameraModel.id, cameraModel.rasm,cameraModel.nomi,cameraModel.malumot,cameraModel.kategoriya,R.drawable.ic_heart4,"selected")
+                    myDbHelper.updateCamera(cameraModel)
+                    rvAdapter.list = list
+                    a++
+                } else {
+                    cameralayoutBinding.bookmarkBtn.setImageResource(R.drawable.ic_heart3)
+                    cameraModel.like = R.drawable.ic_heart3
+                    val cameraModel =
+                        CameraModel(cameraModel.id, cameraModel.rasm,cameraModel.nomi,cameraModel.malumot,cameraModel.kategoriya,R.drawable.ic_heart3,"unselected")
+                    myDbHelper.updateCamera(cameraModel)
+                    rvAdapter.list = list
+                    a = position
+                }
+
+            }
+
 
         })
         binding.cameraRv.adapter = rvAdapter
@@ -177,6 +194,11 @@ class OgohFragment : Fragment() {
 
     private fun showToast(str:String) {
         Toast.makeText(binding.root.context, str, Toast.LENGTH_SHORT).show()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
 
     }
 

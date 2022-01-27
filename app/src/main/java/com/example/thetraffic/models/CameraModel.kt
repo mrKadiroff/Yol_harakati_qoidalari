@@ -9,7 +9,8 @@ class CameraModel: Serializable {
     var nomi: String? = null
     var malumot: String? = null
     var kategoriya: String? = null
-    var like: String? = null
+    var like: Int? = null
+    var tanlangan: String? = null
 
     constructor()
     constructor(
@@ -18,7 +19,8 @@ class CameraModel: Serializable {
         nomi: String?,
         malumot: String?,
         kategoriya: String?,
-        like: String?
+        like: Int?,
+        tanlangan: String?
     ) {
         this.id = id
         this.rasm = rasm
@@ -26,6 +28,7 @@ class CameraModel: Serializable {
         this.malumot = malumot
         this.kategoriya = kategoriya
         this.like = like
+        this.tanlangan = tanlangan
     }
 
     constructor(
@@ -33,13 +36,15 @@ class CameraModel: Serializable {
         nomi: String?,
         malumot: String?,
         kategoriya: String?,
-        like: String?
+        like: Int?,
+        tanlangan: String?
     ) {
         this.rasm = rasm
         this.nomi = nomi
         this.malumot = malumot
         this.kategoriya = kategoriya
         this.like = like
+        this.tanlangan = tanlangan
     }
 
 

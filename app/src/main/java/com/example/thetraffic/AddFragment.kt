@@ -27,6 +27,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -311,24 +312,6 @@ class AddFragment : Fragment() {
 
            fileAbsolutePath = file.absolutePath
             val fileInputStream = FileInputStream(file)
-//            binding.save.setOnClickListener {
-//                val tahrir = arguments?.getSerializable("tahrir") as CameraModel
-//                val heading = binding.name.text.toString().trim()
-//                val descriptionim = binding.description.text.toString().trim()
-//                val kategoriya = binding.spinner.selectedItem.toString()
-//
-//                if (heading.isNotEmpty() && descriptionim.isNotEmpty() && kategoriya != "Qaysi turga kirishi"){
-//                    tahrir.nomi = heading
-//                    tahrir.rasm = fileAbsolutePath
-//                    tahrir.malumot = descriptionim
-//                    tahrir.kategoriya = kategoriya
-//                    myDbHelper.updateCamera(tahrir)
-//                    findNavController().popBackStack()
-//                    Toast.makeText(binding.root.context, fileAbsolutePath, Toast.LENGTH_SHORT).show()
-//                }else{
-//                    Toast.makeText(binding.root.context, "Iltimos ma'lumotlarni to'liq va aniq kiritganingizga ishonch hosil qiling", Toast.LENGTH_SHORT).show()
-//                }
-//        }
 
         }
 
@@ -397,8 +380,9 @@ class AddFragment : Fragment() {
                     val descriptionim = binding.description.text.toString().trim()
                     val kategoriya = binding.spinner.selectedItem.toString()
 
+
                     if (heading.isNotEmpty() && descriptionim.isNotEmpty() && kategoriya != "Qaysi turga kirishi"){
-                        val cameraModel = CameraModel(fileAbsolutePath,heading,descriptionim,kategoriya,"not_liked")
+                        val cameraModel = CameraModel(fileAbsolutePath,heading,descriptionim,kategoriya,R.drawable.ic_heart3,"unselected")
                         myDbHelper.insertCamera(cameraModel)
                         myDbHelper.getAllCamera()
                         findNavController().popBackStack()
@@ -487,7 +471,7 @@ class AddFragment : Fragment() {
 
                     if (heading.isNotEmpty() && descriptionim.isNotEmpty() && kategoriya != "Qaysi turga kirishi") {
                         val cameraModel =
-                            CameraModel(fileAbsolutePath, heading, descriptionim, kategoriya,"not_liked")
+                            CameraModel(fileAbsolutePath, heading, descriptionim, kategoriya,R.drawable.ic_heart3,"unselected")
                         myDbHelper.insertCamera(cameraModel)
                         myDbHelper.getAllCamera()
                         findNavController().popBackStack()

@@ -24,6 +24,8 @@ class Camera_adapter(var list: List<CameraModel>,var onItemClickListener: OnItem
         fun onBind(cameraModel: CameraModel) {
             myDbHelper = MyDbHelper(cameralayoutBinding.root.context)
 
+
+
             cameralayoutBinding.rasm.setImageURI(Uri.parse(cameraModel.rasm))
             cameralayoutBinding.name.text = cameraModel.nomi
 
@@ -37,33 +39,10 @@ class Camera_adapter(var list: List<CameraModel>,var onItemClickListener: OnItem
                 onItemClickListener.onDeleteClick(cameraModel, position)
             }
 
-            cameralayoutBinding.favourite.setOnClickListener {
-                cameralayoutBinding.favourite.setImageResource(R.drawable.ic_heart_filled)
+            cameralayoutBinding.bookmarkBtn.setOnClickListener {
+                onItemClickListener.onFavouriteClick(cameralayoutBinding, cameraModel, adapterPosition)
             }
-
-
-
-
-
-
-
-//            cameralayoutBinding.favourite.setOnCheckedChangeListener { checkBox, isChecked ->
-//                if (isChecked) {
-//                    cameraModel.like = "liked"
-//                    myDbHelper.updateCamera(cameraModel)
-//                    Toast.makeText(cameralayoutBinding.root.context, "Item added to list", Toast.LENGTH_SHORT).show()
-//
-//                } else {
-//                    Toast.makeText(cameralayoutBinding.root.context, "Item removed from list", Toast.LENGTH_SHORT).show()
-//                    cameraModel.like = "not_liked"
-//                    myDbHelper.updateCamera(cameraModel)
-//                }
-//            }
-
-
-
-
-
+            cameralayoutBinding.bookmarkBtn.setImageResource(cameraModel.like!!)
 
         }
 
@@ -83,7 +62,10 @@ class Camera_adapter(var list: List<CameraModel>,var onItemClickListener: OnItem
         fun onItemClick(cameraModel: CameraModel)
         fun onEditClick(cameraModel: CameraModel, position: Int)
         fun onDeleteClick(cameraModel: CameraModel, position: Int)
-//        fun onFavouriteClick(cameraModel: CameraModel, position: Int,checkBox: CheckBox)
+
+        fun onFavouriteClick(cameralayoutBinding: CamerLayoutBinding, cameraModel: CameraModel,position: Int)
     }
+
+
 
 }

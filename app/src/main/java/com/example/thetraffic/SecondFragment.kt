@@ -1,12 +1,16 @@
 package com.example.thetraffic
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import androidx.navigation.fragment.findNavController
 import com.example.thetraffic.adapters.Camera_adapter
+import com.example.thetraffic.databinding.CamerLayoutBinding
 import com.example.thetraffic.databinding.FragmentOgohBinding
 import com.example.thetraffic.databinding.FragmentSecondBinding
 import com.example.thetraffic.db.MyDbHelper
@@ -35,10 +39,10 @@ class SecondFragment : Fragment() {
         }
     }
     lateinit var binding: FragmentSecondBinding
-    lateinit var cameraList: ArrayList<CameraModel>
     lateinit var myDbHelper: MyDbHelper
     lateinit var rvAdapter: Camera_adapter
     lateinit var list: ArrayList<CameraModel>
+    lateinit var listkamera: ArrayList<CameraModel>
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -46,41 +50,104 @@ class SecondFragment : Fragment() {
         // Inflate the layout for this fragment
         binding= FragmentSecondBinding.inflate(layoutInflater)
         myDbHelper = MyDbHelper(binding.root.context)
-
-        cameraList = myDbHelper.getAllCamera()
+        listkamera = myDbHelper.getAllCamera()
         list = ArrayList()
-        for (like in cameraList){
-            if (like.like == "liked"){
-                list.add(like)
+
+        for (camerav in listkamera){
+            if (camerav.tanlangan == "selected"){
+                list.add(camerav)
             }
         }
+        
 
         rvAdapter = Camera_adapter(list, object : Camera_adapter.OnItemClickListener{
             override fun onItemClick(cameraModel: CameraModel) {
-                TODO("Not yet implemented")
+                var bundle = Bundle()
+                bundle.putSerializable("data",cameraModel)
+                findNavController().navigate(R.id.resultFragment,bundle)
             }
 
             override fun onEditClick(cameraModel: CameraModel, position: Int) {
-                TODO("Not yet implemented")
+                var bundle = Bundle()
+                bundle.putString("edit","edit")
+                bundle.putSerializable("tahrir",cameraModel)
+                findNavController().navigate(R.id.addFragment,bundle)
             }
 
             override fun onDeleteClick(cameraModel: CameraModel, position: Int) {
-                TODO("Not yet implemented")
+                myDbHelper.deleteCamera(cameraModel)
+                list.remove(cameraModel)
+                rvAdapter.notifyItemRemoved(position)
+                rvAdapter.notifyItemRangeChanged(position, list.size)
+
+
+
+                val filesDir = binding.root.context.filesDir
+
+                if (filesDir.isDirectory){
+                    val listFiles = filesDir.listFiles()
+
+                    for (listFile in listFiles) {
+                        if (listFile.absolutePath == cameraModel.rasm){
+                            listFile.delete()
+                        }
+
+
+                    }
+                }
+            }
+            var a = 100
+            override fun onFavouriteClick(
+                cameralayoutBinding: CamerLayoutBinding,
+                cameraModel: CameraModel,
+                position: Int
+            ) {
+
+                cameralayoutBinding.bookmarkBtn.setImageResource(R.drawable.ic_heart3)
+                if (a == position) {
+                    cameralayoutBinding.bookmarkBtn.setImageResource(R.drawable.ic_heart3)
+                    cameraModel.like = R.drawable.ic_heart3
+                    val cameraModel =
+                        CameraModel(cameraModel.id, cameraModel.rasm,cameraModel.nomi,cameraModel.malumot,cameraModel.kategoriya,R.drawable.ic_heart3,"unselected")
+                    myDbHelper.updateCamera(cameraModel)
+                    rvAdapter.list = list
+                    a++
+                } else {
+                    cameralayoutBinding.bookmarkBtn.setImageResource(R.drawable.ic_heart4)
+                    cameraModel.like = R.drawable.ic_heart4
+                    val cameraModel =
+                        CameraModel(cameraModel.id, cameraModel.rasm,cameraModel.nomi,cameraModel.malumot,cameraModel.kategoriya,R.drawable.ic_heart4,"selected")
+                    myDbHelper.updateCamera(cameraModel)
+                    rvAdapter.list = list
+                    a = position
+                }
+                rvAdapter.list = list
+                list.clear()
+                for (camerav in listkamera){
+                    if (camerav.tanlangan == "selected"){
+                        list.add(camerav)
+                    }
+                }
+                rvAdapter.notifyDataSetChanged()
             }
 
-//            override fun onFavouriteClick(
-//                cameraModel: CameraModel,
-//                position: Int,
-//                checkBox: CheckBox
-//            ) {
-//                TODO("Not yet implemented")
-//            }
 
         })
         binding.favouriteRv.adapter = rvAdapter
         rvAdapter.notifyDataSetChanged()
 
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        list.clear()
+        for (camerav in listkamera){
+            if (camerav.tanlangan == "selected"){
+                list.add(camerav)
+            }
+        }
+        rvAdapter.notifyDataSetChanged()
     }
 
     companion object {

@@ -11,7 +11,7 @@ class MyDbHelper(context: Context) :
     SQLiteOpenHelper(context, Constant.DB_NAME, null, Constant.DB_VERSION), DatabaseService{
     override fun onCreate(db: SQLiteDatabase?) {
         val query =
-            "create table ${Constant.TABLE_NAME} (${Constant.ID} integer not null primary key autoincrement unique, ${Constant.PHOTO} text not null, ${Constant.NAME} text not null, ${Constant.DESCRIPTION} text not null, ${Constant.CATEGORY} text not null, ${Constant.LIKED} text not null)"
+            "create table ${Constant.TABLE_NAME} (${Constant.ID} integer not null primary key autoincrement unique, ${Constant.PHOTO} text not null, ${Constant.NAME} text not null, ${Constant.DESCRIPTION} text not null, ${Constant.CATEGORY} text not null, ${Constant.LIKED} Integer not null, ${Constant.SELECTED} text not null)"
         db?.execSQL(query)
     }
 
@@ -28,6 +28,7 @@ class MyDbHelper(context: Context) :
         contentValues.put(Constant.DESCRIPTION, cameraModel.malumot)
         contentValues.put(Constant.CATEGORY, cameraModel.kategoriya)
         contentValues.put(Constant.LIKED, cameraModel.like)
+        contentValues.put(Constant.SELECTED, cameraModel.tanlangan)
         database.insert(Constant.TABLE_NAME, null, contentValues)
         database.close()
     }
@@ -47,6 +48,7 @@ class MyDbHelper(context: Context) :
         contentValues.put(Constant.NAME, cameraModel.nomi)
         contentValues.put(Constant.CATEGORY, cameraModel.kategoriya)
         contentValues.put(Constant.LIKED, cameraModel.like)
+        contentValues.put(Constant.SELECTED, cameraModel.tanlangan)
         return database.update(
             Constant.TABLE_NAME,
             contentValues,
@@ -68,8 +70,9 @@ class MyDbHelper(context: Context) :
                 val name = cursor.getString(2)
                 val description = cursor.getString(3)
                 val category = cursor.getString(4)
-                val like = cursor.getString(5)
-                val camera = CameraModel(id, photo, name, description, category,like)
+                val like = cursor.getInt(5)
+                val tanlangan = cursor.getString(6)
+                val camera = CameraModel(id, photo, name, description, category,like,tanlangan)
                 list.add(camera)
             } while (cursor.moveToNext())
         }
